@@ -12,15 +12,15 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 warnings.filterwarnings("ignore")
 
 # Read the AirPassengers dataset
-df = pd.read_csv('AirPassengers.csv',
-                 index_col='Month',
-                 parse_dates=True,
-                 )
+df = pd.read_csv('out.csv',
+                 index_col='Date')
+                 #parse_dates=True,
+                 #)
 print(df)
 
-stable_data = df.query("Month <= '1957-01-01'")
+stable_data = df.query("Date <= 1100")
 
-stable_data['Value'].plot(figsize=(12, 5), legend=True)
+#stable_data['Value'].plot(figsize=(12, 5), legend=True)
 plt.show()
 
 '''
@@ -63,14 +63,14 @@ plt.show()
 '''
 
 # Train the model on the full dataset
-model = SARIMAX(df['Value'],
+model = SARIMAX(stable_data['Value'],
                 order=(1, 0, 0),
                 seasonal_order=(2, 1, 0, 12))
 result = model.fit()
 
 # Forecast for the next 3 years
-forecast = result.predict(start = len(stable_data),
-                          end = (len(stable_data)-1) + 9 * 12,
+forecast = result.predict(start = len(stable_data) - 10 * 12,
+                          end = len(df),
                           typ = 'levels').rename('Forecast')
 
 print(forecast)
