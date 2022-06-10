@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime
 import httplib2
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
@@ -36,6 +36,7 @@ def get_data():
         temp = all_data[i]
         values.append(float(temp[1].replace(',', '.')))
         date.append(temp[0][:10])
+
     df = pd.DataFrame(values, index=date, columns=['Value'], )
     df = df.rename_axis("Date")
     df.to_csv('out.csv')

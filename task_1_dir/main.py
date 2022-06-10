@@ -3,36 +3,28 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
-
-# Read the AirPassengers dataset
-airline = pd.read_csv('out.csv',
-                      index_col='Date',
-                      parse_dates=True)
-print(airline)
-# Print the first five rows of the dataset
-airline.head()
-'''
-# ETS Decomposition
-result = seasonal_decompose(airline['#Passengers'],
-                            model='multiplicative')
-
-# ETS plot
-result.plot()
-
-
-
-plt.show()
-# Import the library
 from pmdarima import auto_arima
 
 # Ignore harmless warnings
 import warnings
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 warnings.filterwarnings("ignore")
 
-# Fit auto_arima function to AirPassengers dataset
+# Read the AirPassengers dataset
+df = pd.read_csv('AirPassengers.csv',
+                 index_col='Month',
+                 parse_dates=True,
+                 )
+print(df)
 
-stepwise_fit = auto_arima(airline['#Passengers'], start_p=1, start_q=1,
+stable_data = df.query("Month <= '1957-01-01'")
+
+stable_data['Value'].plot(figsize=(12, 5), legend=True)
+plt.show()
+
+'''
+stepwise_fit = auto_arima(stable_data['Value'], start_p=1, start_q=1,
                           max_p=3, max_q=3, m=12,
                           start_P=0, seasonal=True,
                           d=None, D=1, trace=True,
@@ -42,59 +34,47 @@ stepwise_fit = auto_arima(airline['#Passengers'], start_p=1, start_q=1,
 
 # To print the summary
 
-#stepwise_fit.summary()
-
+stepwise_fit.summary()
+'''
+'''
 # Split data into train / test sets
-train = airline.iloc[:len(airline) - 12]
-test = airline.iloc[len(airline) - 12:]  # set one year(12 months) for testing
+train = stable_data.iloc[:len(stable_data) - 12 * 31]
+test = stable_data.iloc[len(stable_data) - 12 * 31:]  # set one year(12 months) for testing
 
-# Fit a SARIMAX(0, 1, 1)x(2, 1, 1, 12) on the training set
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-model = SARIMAX(train['#Passengers'],
-                order=(0, 1, 1),
-                seasonal_order=(2, 1, 1, 12))
+model = SARIMAX(test['Value'],
+                order=(1, 0, 0),
+                seasonal_order=(2, 1, 0, 12))
 
 result = model.fit()
-result.summary()
 
-
-
-start = len(train)
-end = len(train) + len(test) - 1
+start = '2021-01-26'
+end = '2022-01-01'
 
 # Predictions for one-year against the test set
-predictions = result.predict(start, end,
+predictions = result.predict(start=start,
+                             end=end,
                              typ='levels').rename("Predictions")
 
 # plot predictions and actual values
 predictions.plot(legend=True)
-test['#Passengers'].plot(legend=True)
+test['Value'].plot(legend=True)
 
 plt.show()
-
-# Load specific evaluation tools
-from sklearn.metrics import mean_squared_error
-from statsmodels.tools.eval_measures import rmse
-
-
-
-print("RMSE = ", rmse(test["#Passengers"], predictions))
-print("mean_squared_error = ", mean_squared_error(test["#Passengers"], predictions))
+'''
 
 # Train the model on the full dataset
-model = SARIMAX(airline['#Passengers'],
-                        order=(0, 1, 1),
-                        seasonal_order=(2, 1, 1, 12))
+model = SARIMAX(df['Value'],
+                order=(1, 0, 0),
+                seasonal_order=(2, 1, 0, 12))
 result = model.fit()
 
 # Forecast for the next 3 years
-forecast = result.predict(start=len(airline),
-                          end=(len(airline) - 1) + 100 * 12,
-                          typ='levels').rename('Forecast')
+forecast = result.predict(start = len(stable_data),
+                          end = (len(stable_data)-1) + 9 * 12,
+                          typ = 'levels').rename('Forecast')
 
+print(forecast)
 # Plot the forecast values
-airline['#Passengers'].plot(figsize=(12, 5), legend=True)
+df['Value'].plot(figsize=(12, 5), legend=True)
 forecast.plot(legend=True)
 plt.show()
-'''
