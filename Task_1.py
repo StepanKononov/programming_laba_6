@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import seasonal_decompose
 
 # Read the AirPassengers dataset
-airline = pd.read_csv('AirPassengers.csv',
-					index_col ='Month',
-					parse_dates = True)
+airline = pd.read_csv('task_1_dir/AirPassengers.csv',
+					  index_col ='Month',
+					  parse_dates = True)
 
 # Print the first five rows of the dataset
 airline.head()
