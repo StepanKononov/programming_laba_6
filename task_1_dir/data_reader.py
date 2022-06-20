@@ -35,10 +35,11 @@ def get_data():
     for i in range(1, len(resp["values"])):
         temp = all_data[i]
         values.append(float(temp[1].replace(',', '.')))
-        #date.append(temp[0][:10])
-        date.append(i)
-    df = pd.DataFrame(values, index=date, columns=['Value'], )
+        date.append(temp[0][:10])
+        #date.append(i)
+    df = pd.DataFrame(values, index=date, columns=['Value'])
     df = df.rename_axis("Date")
-    df.to_csv('out.csv')
-    print(df)
+    #df.to_csv('out.csv')
+    return df
+
 get_data()
