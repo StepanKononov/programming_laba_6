@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots()
 
-# hide axes
 fig.patch.set_visible(False)
 ax.axis('off')
 ax.axis('tight')
